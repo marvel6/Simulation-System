@@ -1,0 +1,14 @@
+/.idea
+/node_modules
+/dist
+/build
+/coverage
+/logs
+/tmp
+/docs
+/tests
+/examples
+/scripts
+/config
+/public
+/src
