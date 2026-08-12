@@ -27,7 +27,7 @@ export class RedisStack extends cdk.Stack {
             allowAllOutbound: true,
         });
 
-        this.securityGroup.addIngressRule(this.clientSecurityGroup, ec2.Port.tcp(6379));
+        this.securityGroup.addIngressRule(this.clientSecurityGroup, ec2.Port.tcp(6379), 'Allow Redis access from ECS clients only');
 
 
         const subnetGroup = new elasticache.CfnSubnetGroup(this, 'ClusterSubnetGroup', {
@@ -36,12 +36,13 @@ export class RedisStack extends cdk.Stack {
         })
 
         const cluster = new elasticache.CfnCacheCluster(this, 'CrowdSimCluster', {
-            clusterName: 'CrowdSimCluster',
+            clusterName: 'Crowd-Sim-Redis-Cluster',
             engine: 'redis',
             cacheNodeType: 'cache.t3.micro',
             numCacheNodes: 1,
             vpcSecurityGroupIds: [this.securityGroup.securityGroupId],
             cacheSubnetGroupName: subnetGroup.ref,
+            engineVersion: '7.0',
         })
 
         this.redisEndpoint = `${cluster.attrRedisEndpointAddress}:${cluster.attrRedisEndpointPort}`
