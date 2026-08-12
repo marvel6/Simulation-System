@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib/core';
+import { EcsStack } from '../lib/ecs-stack';
 import { RedisStack } from '../lib/redis-stack';
 import { NetworkStack } from '../lib/network-stack';
 
@@ -14,8 +15,15 @@ const networkStack = new NetworkStack(app, 'NetworkStack', {
   env: env,
 });
 
-new RedisStack(app, 'RedisStack', {
+const redisStack = new RedisStack(app, 'RedisStack', {
   stackName: 'Crowd-Sim-Redis-Stack',
   vpc: networkStack.vpc,
   env: env,
+});
+
+new EcsStack(app, 'EcsStack', {
+  stackName: 'Crowd-Sim-Ecs-Stack',
+  vpc: networkStack.vpc,
+  env: env,
+  redisEndpoint: redisStack.redisEndpoint,
 });
