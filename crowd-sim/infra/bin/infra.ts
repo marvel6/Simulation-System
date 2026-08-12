@@ -25,6 +25,6 @@ new EcsStack(app, 'EcsStack', {
   stackName: 'Crowd-Sim-Ecs-Stack',
   vpc: networkStack.vpc,
   env: env,
-  redisUrl: redisStack.redisEndpoint,
+  redisEndpoint: redisStack.redisEndpoint,
   clientSecurityGroup: redisStack.clientSecurityGroup,
 });

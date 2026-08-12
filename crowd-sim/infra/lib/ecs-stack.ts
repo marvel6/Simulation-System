@@ -5,7 +5,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
 export interface EcsStackProps extends cdk.StackProps {
     vpc: ec2.Vpc;
-    redisUrl: string;
+    redisEndpoint: string;
     clientSecurityGroup: ec2.SecurityGroup;
 }
 
@@ -18,7 +18,7 @@ export class EcsStack extends cdk.Stack {
 
         const cluster = new ecs.Cluster(this, `Ec2Cluster`, { vpc: props.vpc })
 
-        this.redisUrl = `redis://${props.redisUrl}`
+        this.redisUrl = `redis://${props.redisEndpoint}`
 
         this.getPartitions().forEach(partition => {
 
@@ -27,7 +27,7 @@ export class EcsStack extends cdk.Stack {
             const taskDefinition = new ecs.FargateTaskDefinition(this, `${partition}-TaskDef`)
 
             taskDefinition.addContainer("CrowdSimContainer", {
-                image: ecs.ContainerImage.fromAsset('../services/simulation/Dockerfile'),
+                image: ecs.ContainerImage.fromAsset('../services/simulation'),
                 memoryLimitMiB: 512,
                 cpu: 256,
                 environment: {
