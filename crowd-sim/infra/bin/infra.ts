@@ -4,7 +4,7 @@ import { RedisStack } from '../lib/redis-stack';
 import { NetworkStack } from '../lib/network-stack';
 
 const env = {
-  account: '035052194248',
+  account: '841666121059',
   region: 'us-east-1',
 };
 
