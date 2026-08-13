@@ -24,7 +24,12 @@ export class EcsStack extends cdk.Stack {
 
             const partitionId = `partition-${partition}`
 
-            const taskDefinition = new ecs.FargateTaskDefinition(this, `${partition}-TaskDef`)
+            const taskDefinition = new ecs.FargateTaskDefinition(this, `${partition}-TaskDef`,{
+                runtimePlatform:{
+                    cpuArchitecture:ecs.CpuArchitecture.ARM64,
+                    operatingSystemFamily:ecs.OperatingSystemFamily.LINUX,
+                }
+            })
 
             taskDefinition.addContainer("CrowdSimContainer", {
                 image: ecs.ContainerImage.fromAsset('../services/simulation'),
@@ -34,7 +39,7 @@ export class EcsStack extends cdk.Stack {
                     REDIS_URL: this.redisUrl,
                     PARTITION_ID: partitionId,
                 },
-                logging: new ecs.AwsLogDriver({ streamPrefix: partitionId }),
+                logging: new ecs.AwsLogDriver({ streamPrefix: partitionId })
             })
 
             const service = new ecs.FargateService(this, `${partition}-CrowdSimService`, {
@@ -46,7 +51,9 @@ export class EcsStack extends cdk.Stack {
                     enable: true
                 },
                 securityGroups: [props.clientSecurityGroup],
-                vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }
+                vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+                minHealthyPercent: 0,
+                maxHealthyPercent: 200,
             })
 
             new cdk.CfnOutput(this, `${partition}-CrowdSimServiceOutput`, {
