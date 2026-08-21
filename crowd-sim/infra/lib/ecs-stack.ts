@@ -20,6 +20,11 @@ export class EcsStack extends cdk.Stack {
 
         this.redisUrl = `redis://${props.redisEndpoint}`
 
+        // Build once from the monorepo root so @crowd-sim/shared is available.
+        const simulationImage = ecs.ContainerImage.fromAsset('..', {
+            file: 'services/simulation/Dockerfile',
+        })
+
         this.getPartitions().forEach(partition => {
 
             const partitionId = `partition-${partition}`
@@ -32,7 +37,7 @@ export class EcsStack extends cdk.Stack {
             })
 
             taskDefinition.addContainer("CrowdSimContainer", {
-                image: ecs.ContainerImage.fromAsset('../services/simulation'),
+                image: simulationImage,
                 memoryLimitMiB: 512,
                 cpu: 256,
                 environment: {
