@@ -3,7 +3,10 @@ import { tick } from "./tick-loop.js";
 
 const PARTITION_ID = process.env.PARTITION_ID ?? "partition-A";
 const REDIS_URL = process.env.REDIS_URL;
-if (!REDIS_URL) throw new Error("REDIS_URL environment variable is required");
+
+if (!REDIS_URL) {
+    throw new Error("REDIS_URL environment variable is required");
+}
 
 const TICK_MS = 100; // measured variable — Hypothesis Set 1 (tick rate)
 
