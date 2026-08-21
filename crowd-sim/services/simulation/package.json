@@ -9,6 +9,7 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
+    "@crowd-sim/shared": "0.0.1",
     "redis": "^4.7.0"
   },
   "devDependencies": {
