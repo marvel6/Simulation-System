@@ -1,0 +1,8 @@
+{
+  "name": "crowd-sim",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ]
+}
