@@ -1,0 +1,16 @@
+# Keep the ECS image build context small (context = crowd-sim/)
+**/node_modules
+**/dist
+**/cdk.out
+**/.git
+**/coverage
+
+infra
+docs
+experiments
+tests
+services/orchestrator
+
+README.md
+Makefile
+*.md
