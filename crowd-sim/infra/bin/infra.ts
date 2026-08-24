@@ -27,4 +27,5 @@ new EcsStack(app, 'EcsStack', {
   env: env,
   redisEndpoint: redisStack.redisEndpoint,
   clientSecurityGroup: redisStack.clientSecurityGroup,
+  redisSecurityGroupId: redisStack.securityGroup.securityGroupId,
 });
