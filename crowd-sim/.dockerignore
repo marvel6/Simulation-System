@@ -9,7 +9,6 @@ infra
 docs
 experiments
 tests
-services/orchestrator
 
 README.md
 Makefile

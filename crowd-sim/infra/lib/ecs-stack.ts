@@ -24,15 +24,18 @@ export class EcsStack extends cdk.Stack {
         const simulationImage = ecs.ContainerImage.fromAsset('..', {
             file: 'services/simulation/Dockerfile',
         })
+        const orchestratorImage = ecs.ContainerImage.fromAsset('..', {
+            file: 'services/orchestrator/Dockerfile'
+        })
 
         this.getPartitions().forEach(partition => {
 
             const partitionId = `partition-${partition}`
 
-            const taskDefinition = new ecs.FargateTaskDefinition(this, `${partition}-TaskDef`,{
-                runtimePlatform:{
-                    cpuArchitecture:ecs.CpuArchitecture.ARM64,
-                    operatingSystemFamily:ecs.OperatingSystemFamily.LINUX,
+            const taskDefinition = new ecs.FargateTaskDefinition(this, `${partition}-TaskDef`, {
+                runtimePlatform: {
+                    cpuArchitecture: ecs.CpuArchitecture.ARM64,
+                    operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
                 }
             })
 
@@ -65,8 +68,39 @@ export class EcsStack extends cdk.Stack {
                 value: service.serviceName,
                 description: "The name of the CrowdSim service",
             })
+        });
+
+        const orchestratorTaskDefinition = new ecs.FargateTaskDefinition(this, 'OrchestratorTaskDef', {
+            runtimePlatform: {
+                cpuArchitecture: ecs.CpuArchitecture.ARM64,
+                operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+            }
         })
 
+        orchestratorTaskDefinition.addContainer('OrchestratorContainer', {
+            image: orchestratorImage,
+            memoryLimitMiB: 512,
+            cpu: 256,
+            environment: {
+                REDIS_URL: this.redisUrl,
+                ORCHESTRATOR_INTERVAL_MS: '2000'
+            },
+            logging: new ecs.AwsLogDriver({ streamPrefix: 'orchestrator' })
+        })
+
+        new ecs.FargateService(this, 'OrchestratorService', {
+            cluster: cluster,
+            taskDefinition: orchestratorTaskDefinition,
+            desiredCount: 1,
+            circuitBreaker: {
+                enable: true,
+                rollback: true,
+            },
+            securityGroups: [props.clientSecurityGroup],
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+            maxHealthyPercent: 200,
+            minHealthyPercent: 0
+        })
     }
 
     private getPartitions(): string[] {
