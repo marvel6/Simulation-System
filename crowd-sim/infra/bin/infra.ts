@@ -3,6 +3,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import { EcsStack } from '../lib/ecs-stack';
 import { RedisStack } from '../lib/redis-stack';
 import { NetworkStack } from '../lib/network-stack';
+import { BastionStack } from '../lib/bastion-stack';
 
 const env = {
   account: '841666121059',
@@ -28,4 +29,12 @@ new EcsStack(app, 'EcsStack', {
   redisEndpoint: redisStack.redisEndpoint,
   clientSecurityGroup: redisStack.clientSecurityGroup,
   redisSecurityGroupId: redisStack.securityGroup.securityGroupId,
+});
+
+new BastionStack(app, 'BastionStack', {
+  stackName: 'Crowd-Sim-Bastion-Stack',
+  vpc: networkStack.vpc,
+  env: env,
+  clientSecurityGroup: redisStack.clientSecurityGroup,
+  redisEndpoint: redisStack.redisEndpoint,
 });

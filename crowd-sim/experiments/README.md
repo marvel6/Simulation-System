@@ -24,13 +24,13 @@ yarn workspace @crowd-sim/shared build
 export REDIS_URL='redis://crowd-sim-redis-cluster....:6379'
 
 # one paired static+dynamic rep
-yarn workspace crowd-sim-experiments run -- --mode=both --reps=1
+yarn workspace crowd-sim-experiments experiment --mode=both --reps=1
 
 # dissertation-scale
-yarn workspace crowd-sim-experiments run -- --mode=both --reps=30
+yarn workspace crowd-sim-experiments experiment --mode=both --reps=30
 
 # custom scenario
-yarn workspace crowd-sim-experiments run -- --mode=dynamic --reps=5 \
+yarn workspace crowd-sim-experiments experiment --mode=dynamic --reps=5 \
   --scenario=./scenarios/stadium-evacuation.json
 ```
 
@@ -38,9 +38,12 @@ Outputs: `experiments/results/run-<mode>-repNNN-*.json`
 
 ## Analyze
 ```bash
-pip install -r experiments/requirements.txt
+cd experiments
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cd ..
 yarn workspace crowd-sim-experiments analyze
-# or: python3 experiments/analyze-results.py
 ```
 
 Writes `results/summary.json` and `results/summary.md` (Shapiro-Wilk + paired t / Wilcoxon).

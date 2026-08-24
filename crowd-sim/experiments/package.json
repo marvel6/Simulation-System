@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "run": "tsx run-experiment.ts",
-    "analyze": "python3 analyze-results.py"
+    "experiment": "tsx run-experiment.ts",
+    "analyze": "./.venv/bin/python analyze-results.py"
   },
   "dependencies": {
     "@crowd-sim/shared": "0.0.1",

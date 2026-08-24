@@ -2,9 +2,9 @@
  * Experiment controller (Objective iv).
  *
  * Usage:
- *   REDIS_URL=redis://... yarn workspace crowd-sim-experiments run -- --mode=static --reps=1
- *   REDIS_URL=redis://... yarn workspace crowd-sim-experiments run -- --mode=dynamic --reps=1
- *   REDIS_URL=redis://... yarn workspace crowd-sim-experiments run -- --mode=both --reps=30
+ *   REDIS_URL=redis://... yarn workspace crowd-sim-experiments experiment --mode=static --reps=1
+ *   REDIS_URL=redis://... yarn workspace crowd-sim-experiments experiment --mode=dynamic --reps=1
+ *   REDIS_URL=redis://... yarn workspace crowd-sim-experiments experiment --mode=both --reps=30
  *
  * Requires network reachability to ElastiCache (VPN/bastion/port-forward), or a local Redis
  * running the same services.

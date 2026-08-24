@@ -1,0 +1,48 @@
+# Experiment analysis
+
+Runs loaded: **62**
+
+## meanH
+
+- n (paired reps): 30
+- static mean: 1.442562696193168
+- dynamic mean: 1.2500213425914475
+- mean diff (static - dynamic): 0.1925413536017204
+- normality (Shapiro p): 1.17317859755375e-08
+- test: wilcoxon
+- statistic: 29.0
+- p-value: 3.2391399145126343e-06
+
+## maxH
+
+- n (paired reps): 30
+- static mean: 1.9195508075688772
+- dynamic mean: 1.8624012601154918
+- mean diff (static - dynamic): 0.05714954745338529
+- normality (Shapiro p): 3.568893742777028e-10
+- test: wilcoxon
+- statistic: 0.0
+- p-value: 0.06788915486182899
+
+## finalH
+
+- n (paired reps): 30
+- static mean: 1.1635836885062816
+- dynamic mean: 1.1755745366293435
+- mean diff (static - dynamic): -0.0119908481230618
+- normality (Shapiro p): 1.0482915866007496e-08
+- test: wilcoxon
+- statistic: 158.0
+- p-value: 0.12542824591441903
+
+## meanLoadStd
+
+- n (paired reps): 30
+- static mean: 65.7912613205365
+- dynamic mean: 56.06445739104935
+- mean diff (static - dynamic): 9.726803929487147
+- normality (Shapiro p): 2.6206125874624165e-08
+- test: wilcoxon
+- statistic: 29.0
+- p-value: 3.2391399145126343e-06
+
