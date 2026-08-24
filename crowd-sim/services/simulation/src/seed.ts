@@ -2,23 +2,29 @@ import type { Agent, PartitionBounds } from "@crowd-sim/shared";
 import { WORLD } from "@crowd-sim/shared";
 import { myAgents } from "./agent.js";
 
-const DEFAULT_SEED_COUNT = Number(process.env.SEED_AGENT_COUNT ?? 40);
-
 /**
  * Spawn agents inside this partition's bounds, walking toward the east exit.
- * Only partition-A seeds by default so agents migrate across B/C/D as they walk.
+ * Only the designated seed partition creates agents.
  */
-export function seedAgents(partitionId: string, bounds: PartitionBounds) {
-  if (partitionId !== "partition-A") return;
-  if (myAgents.size > 0) return;
+export function seedAgents(
+  partitionId: string,
+  bounds: PartitionBounds,
+  options?: { count?: number; seedPartition?: string; force?: boolean }
+) {
+  const seedPartition = options?.seedPartition ?? "partition-A";
+  if (partitionId !== seedPartition) return;
+  if (!options?.force && myAgents.size > 0) return;
 
-  const count = Number.isFinite(DEFAULT_SEED_COUNT) ? DEFAULT_SEED_COUNT : 40;
+  myAgents.clear();
+
+  const count = options?.count ?? Number(process.env.SEED_AGENT_COUNT ?? 40);
+  const n = Number.isFinite(count) && count > 0 ? count : 40;
   const width = Math.max(1, bounds.maxX - bounds.minX);
   const height = Math.max(1, bounds.maxY - bounds.minY);
 
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < n; i++) {
     const agent: Agent = {
-      agentId: `${partitionId}-agent-${i}`,
+      agentId: `${partitionId}-agent-${i}-${Date.now()}`,
       position: {
         x: bounds.minX + 10 + Math.random() * (width - 20),
         y: bounds.minY + 10 + Math.random() * (height - 20),

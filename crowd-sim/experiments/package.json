@@ -1,0 +1,19 @@
+{
+  "name": "crowd-sim-experiments",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "tsx run-experiment.ts",
+    "analyze": "python3 analyze-results.py"
+  },
+  "dependencies": {
+    "@crowd-sim/shared": "0.0.1",
+    "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}

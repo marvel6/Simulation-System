@@ -1,34 +1,17 @@
-import { fitnessH } from "../services/orchestrator/src/fitness-function.js";
-import type { PartitionLoad } from "../services/orchestrator/src/load-monitor.js";
+import { fitnessH } from "../packages/shared/src/fitness.js";
 
-function load(partitionId: string, agentCount: number): PartitionLoad {
-  return {
-    partitionId,
-    agentCount,
-    bounds: { minX: 0, maxX: 300, minY: 0, maxY: 600 },
-    updatedAt: Date.now(),
-  };
+function assert(cond: boolean, msg: string) {
+  if (!cond) throw new Error(msg);
 }
 
-const balanced = [
-  load("partition-A", 50),
-  load("partition-B", 50),
-  load("partition-C", 50),
-  load("partition-D", 50),
-];
-
-const skewed = [
-  load("partition-A", 200),
-  load("partition-B", 0),
-  load("partition-C", 0),
-  load("partition-D", 0),
-];
+const balanced = [50, 50, 50, 50];
+const skewed = [200, 0, 0, 0];
 
 const hBalanced = fitnessH(balanced);
 const hSkewed = fitnessH(skewed);
 
-if (!(hSkewed > hBalanced)) {
-  throw new Error(`Expected skewed H (${hSkewed}) > balanced H (${hBalanced})`);
-}
+assert(hSkewed > hBalanced, `Expected skewed H (${hSkewed}) > balanced H (${hBalanced})`);
+assert(fitnessH([]) === 0, "empty should be 0");
+assert(fitnessH([0, 0, 0, 0]) === 0, "all-zero should be 0");
 
 console.log("fitness-function.test.ts OK", { hBalanced, hSkewed });

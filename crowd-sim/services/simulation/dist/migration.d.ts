@@ -1,5 +1,6 @@
 import type { RedisConnection } from "./redis-client.js";
 import type { Agent, PartitionBounds } from "@crowd-sim/shared";
+export declare function clearPendingMigrations(): void;
 /** Step 1: Payload Serialization */
 export declare function initiateMigrationsForLeavingAgents(redis: RedisConnection, partitionId: string, agents: Map<string, Agent>, bounds: PartitionBounds): Promise<void>;
 /** Step 2 + 3: Target Ingestion, then Transactional Confirmation (ACK) */

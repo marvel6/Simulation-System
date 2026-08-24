@@ -8,6 +8,10 @@ const ACK_TIMEOUT_MS = 2000;
 
 const pendingMigrations: Map<string, { targetPartitionId: string; sentAt: number }> = new Map();
 
+export function clearPendingMigrations() {
+  pendingMigrations.clear();
+}
+
 /** Step 1: Payload Serialization */
 export async function initiateMigrationsForLeavingAgents(
   redis: RedisConnection,

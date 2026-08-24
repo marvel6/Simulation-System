@@ -3,6 +3,9 @@ import { isInBounds } from "./agent.js";
 import { resolvePartitionForPosition } from "./partition-state.js";
 const ACK_TIMEOUT_MS = 2000;
 const pendingMigrations = new Map();
+export function clearPendingMigrations() {
+    pendingMigrations.clear();
+}
 /** Step 1: Payload Serialization */
 export async function initiateMigrationsForLeavingAgents(redis, partitionId, agents, bounds) {
     for (const agent of agents.values()) {

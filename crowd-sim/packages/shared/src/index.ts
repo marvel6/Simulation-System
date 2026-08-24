@@ -18,3 +18,4 @@ export {
   resolveOwnerPartition,
 } from "./types.js";
 export { redisKeys } from "./redis-keys.js";
+export { fitnessH } from "./fitness.js";

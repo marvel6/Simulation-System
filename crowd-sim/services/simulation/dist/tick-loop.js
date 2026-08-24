@@ -1,8 +1,9 @@
 import { myAgents, myBounds } from "./agent.js";
 import { updateAgentPosition } from "./steering.js";
 import { emitBoundaryAgents, readNeighborBoundaryAgents } from "./boundary-sync.js";
-import { initiateMigrationsForLeavingAgents, ingestIncomingAgents, confirmMigrationsAndPurge, } from "./migration.js";
 import { publishLoad, publishViewerSnapshot, syncBoundsFromRedis } from "./partition-state.js";
+import { maybeApplyExperimentCommand } from "./experiment-control.js";
+import { initiateMigrationsForLeavingAgents, ingestIncomingAgents, confirmMigrationsAndPurge, } from "./migration.js";
 const AOI = 40;
 function nearbyFor(agent, locals, ghosts) {
     const pool = [...locals, ...ghosts];
@@ -15,6 +16,7 @@ function nearbyFor(agent, locals, ghosts) {
     });
 }
 export async function tick(redis, partitionId) {
+    await maybeApplyExperimentCommand(redis, partitionId);
     await syncBoundsFromRedis(redis, partitionId);
     // 0. Ingest migrations from neighbors
     await ingestIncomingAgents(redis, partitionId, myAgents);

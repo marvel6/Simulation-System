@@ -7,4 +7,9 @@ export declare const redisKeys: {
     neighborMap: () => string;
     /** Lightweight agent positions for the live viewer UI */
     viewerAgents: (partitionId: string) => string;
+    /** "true" | "false" — experiment runner toggles static vs dynamic */
+    rebalanceEnabled: () => string;
+    /** Latest experiment command JSON for partitions to apply */
+    experimentCommand: () => string;
+    experimentApplied: (partitionId: string) => string;
 };

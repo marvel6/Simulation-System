@@ -6,6 +6,9 @@
   "agentCount": 200,
   "tickMs": 100,
   "seedPartition": "partition-A",
+  "durationMs": 90000,
+  "sampleIntervalMs": 1000,
+  "exitProximity": 40,
   "exits": [
     { "id": "east-gate", "x": 1190, "y": 300 }
   ],

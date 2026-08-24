@@ -7,4 +7,9 @@ export const redisKeys = {
     neighborMap: () => `orchestrator:neighbor-map`,
     /** Lightweight agent positions for the live viewer UI */
     viewerAgents: (partitionId) => `partition:${partitionId}:viewer-agents`,
+    /** "true" | "false" — experiment runner toggles static vs dynamic */
+    rebalanceEnabled: () => `orchestrator:rebalance-enabled`,
+    /** Latest experiment command JSON for partitions to apply */
+    experimentCommand: () => `experiment:command`,
+    experimentApplied: (partitionId) => `experiment:applied:${partitionId}`,
 };

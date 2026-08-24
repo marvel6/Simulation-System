@@ -4,6 +4,7 @@ import { updateAgentPosition } from "./steering.js";
 import type { RedisConnection } from "./redis-client.js";
 import { emitBoundaryAgents, readNeighborBoundaryAgents } from "./boundary-sync.js";
 import { publishLoad, publishViewerSnapshot, syncBoundsFromRedis } from "./partition-state.js";
+import { maybeApplyExperimentCommand } from "./experiment-control.js";
 
 import {
     initiateMigrationsForLeavingAgents,
@@ -24,7 +25,8 @@ function nearbyFor(agent: Agent, locals: Agent[], ghosts: Agent[]): Agent[] {
 }
 
 export async function tick(redis: RedisConnection, partitionId: string) {
-    await syncBoundsFromRedis(redis, partitionId);
+  await maybeApplyExperimentCommand(redis, partitionId);
+  await syncBoundsFromRedis(redis, partitionId);
 
     // 0. Ingest migrations from neighbors
     await ingestIncomingAgents(redis, partitionId, myAgents);
