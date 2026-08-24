@@ -1,24 +1,20 @@
 import { redisKeys } from "@crowd-sim/shared";
 import { isInBounds } from "./agent.js";
-const ACK_TIMEOUT_MS = 2000; // how long the source waits for a target ACK
-// Agents whose migration payload has been pushed but not yet ACK'd.
-// Kept in local memory (agent stays in myAgents too) until ACK confirms.
+import { resolvePartitionForPosition } from "./partition-state.js";
+const ACK_TIMEOUT_MS = 2000;
 const pendingMigrations = new Map();
-// Stub — replace with a lookup against the live partition boundary map (Objective iii)
-export async function resolvePartitionForPosition(_pos, fallbackPartitionId) {
-    return fallbackPartitionId;
-}
 /** Step 1: Payload Serialization */
 export async function initiateMigrationsForLeavingAgents(redis, partitionId, agents, bounds) {
     for (const agent of agents.values()) {
         if (pendingMigrations.has(agent.agentId))
-            continue; // already mid-migration
+            continue;
         if (isInBounds(agent.position, bounds))
             continue;
-        const targetPartitionId = await resolvePartitionForPosition(agent.position, partitionId);
+        const targetPartitionId = await resolvePartitionForPosition(redis, agent.position, partitionId);
+        if (targetPartitionId === partitionId)
+            continue;
         await redis.rPush(redisKeys.incomingAgents(targetPartitionId), JSON.stringify(agent));
         pendingMigrations.set(agent.agentId, { targetPartitionId, sentAt: Date.now() });
-        // Agent stays in `agents` — still simulated here until the ACK confirms handoff.
     }
 }
 /** Step 2 + 3: Target Ingestion, then Transactional Confirmation (ACK) */
@@ -49,7 +45,7 @@ export async function confirmMigrationsAndPurge(redis, partitionId, agents) {
         }
         if (Date.now() - migration.sentAt > ACK_TIMEOUT_MS) {
             console.warn(`[${partitionId}] Migration ACK timeout for agent ${agentId} -> ${migration.targetPartitionId}, retrying`);
-            pendingMigrations.delete(agentId); // re-initiated next tick
+            pendingMigrations.delete(agentId);
         }
     }
 }

@@ -2,20 +2,11 @@ import type { RedisConnection } from "./redis-client.js";
 import type { Agent, PartitionBounds } from "@crowd-sim/shared";
 import { redisKeys } from "@crowd-sim/shared";
 import { isInBounds } from "./agent.js";
+import { resolvePartitionForPosition } from "./partition-state.js";
 
-const ACK_TIMEOUT_MS = 2000; // how long the source waits for a target ACK
+const ACK_TIMEOUT_MS = 2000;
 
-// Agents whose migration payload has been pushed but not yet ACK'd.
-// Kept in local memory (agent stays in myAgents too) until ACK confirms.
 const pendingMigrations: Map<string, { targetPartitionId: string; sentAt: number }> = new Map();
-
-// Stub — replace with a lookup against the live partition boundary map (Objective iii)
-export async function resolvePartitionForPosition(
-  _pos: { x: number; y: number },
-  fallbackPartitionId: string
-): Promise<string> {
-  return fallbackPartitionId;
-}
 
 /** Step 1: Payload Serialization */
 export async function initiateMigrationsForLeavingAgents(
@@ -25,15 +16,19 @@ export async function initiateMigrationsForLeavingAgents(
   bounds: PartitionBounds
 ) {
   for (const agent of agents.values()) {
-    if (pendingMigrations.has(agent.agentId)) continue; // already mid-migration
+    if (pendingMigrations.has(agent.agentId)) continue;
     if (isInBounds(agent.position, bounds)) continue;
 
-    const targetPartitionId = await resolvePartitionForPosition(agent.position, partitionId);
+    const targetPartitionId = await resolvePartitionForPosition(
+      redis,
+      agent.position,
+      partitionId
+    );
+
+    if (targetPartitionId === partitionId) continue;
 
     await redis.rPush(redisKeys.incomingAgents(targetPartitionId), JSON.stringify(agent));
-
     pendingMigrations.set(agent.agentId, { targetPartitionId, sentAt: Date.now() });
-    // Agent stays in `agents` — still simulated here until the ACK confirms handoff.
   }
 }
 
@@ -56,7 +51,6 @@ export async function ingestIncomingAgents(
     }
 
     agents.set(agent.agentId, agent);
-
     await redis.set(redisKeys.migrationAck(agent.agentId), partitionId, { EX: 10 });
   }
 }
@@ -81,7 +75,7 @@ export async function confirmMigrationsAndPurge(
       console.warn(
         `[${partitionId}] Migration ACK timeout for agent ${agentId} -> ${migration.targetPartitionId}, retrying`
       );
-      pendingMigrations.delete(agentId); // re-initiated next tick
+      pendingMigrations.delete(agentId);
     }
   }
 }

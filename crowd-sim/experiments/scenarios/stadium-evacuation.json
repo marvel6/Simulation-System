@@ -1,0 +1,18 @@
+{
+  "world": {
+    "width": 1200,
+    "height": 600
+  },
+  "agentCount": 200,
+  "tickMs": 100,
+  "seedPartition": "partition-A",
+  "exits": [
+    { "id": "east-gate", "x": 1190, "y": 300 }
+  ],
+  "partitions": {
+    "partition-A": { "minX": 0, "maxX": 300, "minY": 0, "maxY": 600 },
+    "partition-B": { "minX": 300, "maxX": 600, "minY": 0, "maxY": 600 },
+    "partition-C": { "minX": 600, "maxX": 900, "minY": 0, "maxY": 600 },
+    "partition-D": { "minX": 900, "maxX": 1200, "minY": 0, "maxY": 600 }
+  }
+}
