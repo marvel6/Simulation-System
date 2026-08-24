@@ -1,6 +1,6 @@
 import type { RedisConnection } from "./redis-client.js";
-import type { Agent, PartitionBounds } from "@crowd-sim/shared";
 import { neighborsFor, redisKeys } from "@crowd-sim/shared";
+import type { Agent, PartitionBounds } from "@crowd-sim/shared";
 
 const BOUNDARY_MARGIN = 20;
 
