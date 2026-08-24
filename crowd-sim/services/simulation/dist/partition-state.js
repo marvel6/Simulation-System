@@ -37,3 +37,16 @@ export async function publishLoad(redis, partitionId, agentCount) {
         updatedAt: Date.now(),
     }), { EX: 5 });
 }
+/** Publish compact poses for the live viewer UI. */
+export async function publishViewerSnapshot(redis, partitionId, agents) {
+    await redis.set(redisKeys.viewerAgents(partitionId), JSON.stringify({
+        partitionId,
+        bounds: myBounds,
+        agents: agents.map((a) => ({
+            id: a.agentId,
+            x: a.position.x,
+            y: a.position.y,
+        })),
+        updatedAt: Date.now(),
+    }), { EX: 2 });
+}

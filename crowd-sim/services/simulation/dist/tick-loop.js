@@ -2,7 +2,7 @@ import { myAgents, myBounds } from "./agent.js";
 import { updateAgentPosition } from "./steering.js";
 import { emitBoundaryAgents, readNeighborBoundaryAgents } from "./boundary-sync.js";
 import { initiateMigrationsForLeavingAgents, ingestIncomingAgents, confirmMigrationsAndPurge, } from "./migration.js";
-import { publishLoad, syncBoundsFromRedis } from "./partition-state.js";
+import { publishLoad, publishViewerSnapshot, syncBoundsFromRedis } from "./partition-state.js";
 const AOI = 40;
 function nearbyFor(agent, locals, ghosts) {
     const pool = [...locals, ...ghosts];
@@ -32,4 +32,6 @@ export async function tick(redis, partitionId) {
     await confirmMigrationsAndPurge(redis, partitionId, myAgents);
     // 6. Report load for the orchestrator fitness function
     await publishLoad(redis, partitionId, myAgents.size);
+    // 7. Compact poses for the live viewer
+    await publishViewerSnapshot(redis, partitionId, allAgents);
 }

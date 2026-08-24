@@ -9,3 +9,11 @@ export declare function resolvePartitionForPosition(redis: RedisConnection, pos:
     y: number;
 }, fallbackPartitionId: string): Promise<string>;
 export declare function publishLoad(redis: RedisConnection, partitionId: string, agentCount: number): Promise<void>;
+/** Publish compact poses for the live viewer UI. */
+export declare function publishViewerSnapshot(redis: RedisConnection, partitionId: string, agents: {
+    agentId: string;
+    position: {
+        x: number;
+        y: number;
+    };
+}[]): Promise<void>;

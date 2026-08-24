@@ -5,4 +5,6 @@ export const redisKeys = {
     partitionBounds: (partitionId) => `partition:${partitionId}:bounds`,
     partitionLoad: (partitionId) => `partition:${partitionId}:load`,
     neighborMap: () => `orchestrator:neighbor-map`,
+    /** Lightweight agent positions for the live viewer UI */
+    viewerAgents: (partitionId) => `partition:${partitionId}:viewer-agents`,
 };

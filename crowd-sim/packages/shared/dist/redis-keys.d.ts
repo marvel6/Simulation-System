@@ -5,4 +5,6 @@ export declare const redisKeys: {
     partitionBounds: (partitionId: string) => string;
     partitionLoad: (partitionId: string) => string;
     neighborMap: () => string;
+    /** Lightweight agent positions for the live viewer UI */
+    viewerAgents: (partitionId: string) => string;
 };
