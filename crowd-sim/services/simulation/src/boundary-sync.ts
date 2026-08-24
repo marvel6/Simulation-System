@@ -1,8 +1,8 @@
 import type { RedisConnection } from "./redis-client.js";
 import type { Agent, PartitionBounds } from "@crowd-sim/shared";
-import { redisKeys } from "@crowd-sim/shared";
+import { neighborsFor, redisKeys } from "@crowd-sim/shared";
 
-const BOUNDARY_MARGIN = 20; // "near the edge" = within 20 units of a border
+const BOUNDARY_MARGIN = 20;
 
 export function isNearBoundary(agent: Agent, bounds: PartitionBounds): boolean {
   const { position } = agent;
@@ -22,24 +22,31 @@ export async function emitBoundaryAgents(
 ) {
   const boundaryAgents = agents.filter((a) => isNearBoundary(a, bounds));
   await redis.set(redisKeys.boundaryAgents(partitionId), JSON.stringify(boundaryAgents), {
-    EX: 5, // TTL — stale data disappears if a partition dies rather than lingering
+    EX: 5,
   });
 }
 
-// Stub — replace with a lookup against the orchestrator's live adjacency map (Objective ii)
-export async function getCurrentNeighborPartitionIds(_partitionId: string): Promise<string[]> {
-  return [];
+export async function getCurrentNeighborPartitionIds(
+  redis: RedisConnection,
+  partitionId: string
+): Promise<string[]> {
+  const raw = await redis.get(redisKeys.neighborMap());
+  if (raw) {
+    const map = JSON.parse(raw) as Record<string, string[]>;
+    if (Array.isArray(map[partitionId])) return map[partitionId];
+  }
+  return neighborsFor(partitionId);
 }
 
 export async function readNeighborBoundaryAgents(
   redis: RedisConnection,
   partitionId: string
 ): Promise<Agent[]> {
-  const neighborIds = await getCurrentNeighborPartitionIds(partitionId);
+  const neighborIds = await getCurrentNeighborPartitionIds(redis, partitionId);
   const results: Agent[] = [];
   for (const neighborId of neighborIds) {
     const raw = await redis.get(redisKeys.boundaryAgents(neighborId));
-    if (raw) results.push(...JSON.parse(raw));
+    if (raw) results.push(...(JSON.parse(raw) as Agent[]));
   }
   return results;
 }
