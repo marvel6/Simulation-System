@@ -3,6 +3,9 @@ export type {
   PartitionBounds,
   Vec2,
   PartitionId,
+  ViewerAgentPose,
+  ViewerPartitionSnapshot,
+  ViewerWorldSnapshot,
 } from "./types.js";
 export {
   WORLD,

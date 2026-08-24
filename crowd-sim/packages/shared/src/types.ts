@@ -19,6 +19,27 @@ export interface PartitionBounds {
   maxY: number;
 }
 
+/** Compact agent pose for the live viewer (keeps Redis payloads small). */
+export interface ViewerAgentPose {
+  id: string;
+  x: number;
+  y: number;
+}
+
+export interface ViewerPartitionSnapshot {
+  partitionId: string;
+  bounds: PartitionBounds;
+  agents: ViewerAgentPose[];
+  updatedAt: number;
+}
+
+export interface ViewerWorldSnapshot {
+  world: { width: number; height: number };
+  partitions: ViewerPartitionSnapshot[];
+  totalAgents: number;
+  updatedAt: number;
+}
+
 /** Full simulation world size (stadium floor in abstract units). */
 export const WORLD = {
   width: 1200,
