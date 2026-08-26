@@ -2,7 +2,7 @@ import { DEFAULT_NEIGHBOR_MAP, DEFAULT_PARTITION_BOUNDS, PARTITION_IDS, redisKey
 import { createClient } from "./redis-client.js";
 import { readPartitionLoads } from "./load-monitor.js";
 import { fitnessH } from "./fitness-function.js";
-import { maybeRebalance } from "./rebalancer.js";
+import { maybeRebalance, maybeResetBoundsWhenEmpty } from "./rebalancer.js";
 const REDIS_URL = process.env.REDIS_URL;
 if (!REDIS_URL)
     throw new Error("REDIS_URL environment variable is required");
@@ -37,6 +37,8 @@ setInterval(() => {
         const summary = loads.map((l) => `${l.partitionId}:${l.agentCount}`).join(" ");
         const rebalanceOn = await isRebalanceEnabled();
         console.log(`[orchestrator] H(P)=${h.toFixed(3)} rebalance=${rebalanceOn} | ${summary}`);
+        // Always restore equal strips once the crowd has fully exited
+        await maybeResetBoundsWhenEmpty(redis, loads);
         if (rebalanceOn) {
             await maybeRebalance(redis, loads);
         }

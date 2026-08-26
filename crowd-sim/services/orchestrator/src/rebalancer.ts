@@ -1,5 +1,10 @@
 import type { PartitionBounds } from "@crowd-sim/shared";
-import { PARTITION_IDS, WORLD, redisKeys } from "@crowd-sim/shared";
+import {
+  DEFAULT_PARTITION_BOUNDS,
+  PARTITION_IDS,
+  WORLD,
+  redisKeys,
+} from "@crowd-sim/shared";
 import type { RedisConnection } from "./redis-client.js";
 import type { PartitionLoad } from "./load-monitor.js";
 import { fitnessH } from "./fitness-function.js";
@@ -12,6 +17,54 @@ function widthOf(b: PartitionBounds): number {
   return b.maxX - b.minX;
 }
 
+function boundsEqual(a: PartitionBounds, b: PartitionBounds): boolean {
+  return (
+    a.minX === b.minX &&
+    a.maxX === b.maxX &&
+    a.minY === b.minY &&
+    a.maxY === b.maxY
+  );
+}
+
+/**
+ * When the world is empty, snap strips back to the default equal layout
+ * so a finished dynamic run does not leave a skewed viewer forever.
+ */
+export async function maybeResetBoundsWhenEmpty(
+  redis: RedisConnection,
+  loads: PartitionLoad[]
+): Promise<boolean> {
+  if (loads.length === 0) return false;
+  if (!loads.every((l) => l.agentCount === 0)) return false;
+
+  let needsReset = false;
+  for (const id of PARTITION_IDS) {
+    const load = loads.find((l) => l.partitionId === id);
+    let current = load?.bounds;
+    if (!current || !(current.maxX > current.minX)) {
+      const raw = await redis.get(redisKeys.partitionBounds(id));
+      current = raw ? (JSON.parse(raw) as PartitionBounds) : undefined;
+    }
+    const def = DEFAULT_PARTITION_BOUNDS[id];
+    if (!current || !boundsEqual(current, def)) {
+      needsReset = true;
+      break;
+    }
+  }
+
+  if (!needsReset) return false;
+
+  for (const id of PARTITION_IDS) {
+    await redis.set(
+      redisKeys.partitionBounds(id),
+      JSON.stringify(DEFAULT_PARTITION_BOUNDS[id])
+    );
+  }
+
+  console.log("[orchestrator] World empty — reset bounds to default equal strips");
+  return true;
+}
+
 /**
  * Boundary-shift rebalancer for vertical strips.
  * Tries shifting each internal boundary left/right and keeps the move
@@ -21,7 +74,6 @@ export async function maybeRebalance(
   redis: RedisConnection,
   loads: PartitionLoad[]
 ): Promise<boolean> {
-  
   const currentH = fitnessH(loads);
 
   if (loads.every((l) => l.agentCount === 0)) return false;

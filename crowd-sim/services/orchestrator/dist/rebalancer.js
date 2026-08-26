@@ -1,10 +1,47 @@
-import { PARTITION_IDS, WORLD, redisKeys } from "@crowd-sim/shared";
+import { DEFAULT_PARTITION_BOUNDS, PARTITION_IDS, WORLD, redisKeys, } from "@crowd-sim/shared";
 import { fitnessH } from "./fitness-function.js";
 const MIN_WIDTH = 80;
 const SHIFT = 40;
 const IMPROVE_EPSILON = 0.02;
 function widthOf(b) {
     return b.maxX - b.minX;
+}
+function boundsEqual(a, b) {
+    return (a.minX === b.minX &&
+        a.maxX === b.maxX &&
+        a.minY === b.minY &&
+        a.maxY === b.maxY);
+}
+/**
+ * When the world is empty, snap strips back to the default equal layout
+ * so a finished dynamic run does not leave a skewed viewer forever.
+ */
+export async function maybeResetBoundsWhenEmpty(redis, loads) {
+    if (loads.length === 0)
+        return false;
+    if (!loads.every((l) => l.agentCount === 0))
+        return false;
+    let needsReset = false;
+    for (const id of PARTITION_IDS) {
+        const load = loads.find((l) => l.partitionId === id);
+        let current = load?.bounds;
+        if (!current || !(current.maxX > current.minX)) {
+            const raw = await redis.get(redisKeys.partitionBounds(id));
+            current = raw ? JSON.parse(raw) : undefined;
+        }
+        const def = DEFAULT_PARTITION_BOUNDS[id];
+        if (!current || !boundsEqual(current, def)) {
+            needsReset = true;
+            break;
+        }
+    }
+    if (!needsReset)
+        return false;
+    for (const id of PARTITION_IDS) {
+        await redis.set(redisKeys.partitionBounds(id), JSON.stringify(DEFAULT_PARTITION_BOUNDS[id]));
+    }
+    console.log("[orchestrator] World empty — reset bounds to default equal strips");
+    return true;
 }
 /**
  * Boundary-shift rebalancer for vertical strips.
